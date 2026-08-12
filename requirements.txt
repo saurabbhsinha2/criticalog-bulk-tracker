@@ -1,1 +1,6 @@
-
+Flask
+requests
+beautifulsoup4
+gunicorn
+pandas
+openpyxl
