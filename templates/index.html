@@ -1,1 +1,111 @@
 
+<!DOCTYPE html>
+<html>
+<head>
+<title>Criticalog Bulk Tracker</title>
+
+<style>
+
+body{
+font-family:Arial;
+padding:20px;
+}
+
+textarea{
+width:100%;
+height:250px;
+}
+
+button{
+padding:10px;
+margin-top:10px;
+}
+
+table{
+width:100%;
+margin-top:20px;
+border-collapse:collapse;
+}
+
+th,td{
+border:1px solid #ddd;
+padding:8px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h2>Criticalog Bulk Tracker</h2>
+
+<textarea id="awbs"
+placeholder="Paste AWBs here"></textarea>
+
+<br>
+
+<button onclick="trackAll()">
+Track All
+</button>
+
+<table>
+
+<thead>
+<tr>
+<th>AWB</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody id="results"></tbody>
+
+</table>
+
+<script>
+
+async function trackAll(){
+
+const awbs =
+document.getElementById("awbs")
+.value
+.split("\n")
+.map(x=>x.trim())
+.filter(x=>x);
+
+const response =
+await fetch("/track",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+awbs:awbs
+})
+});
+
+const data =
+await response.json();
+
+const tbody =
+document.getElementById("results");
+
+tbody.innerHTML="";
+
+data.forEach(item=>{
+
+tbody.innerHTML += `
+<tr>
+<td>${item.awb}</td>
+<td>${item.status}</td>
+</tr>
+`;
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
