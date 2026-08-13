@@ -7,35 +7,30 @@
 
 <title>Criticalog Control Tower</title>
 
-<link href="https://cdn.jsdelivr.net/npm/3.3/dist/css/bootstrap.min.css
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.ootstrap.min.css
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-<style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.fullle>
 
 body{
-    background:#edf2f7;
+    background:#f1f5f9;
     font-family:Segoe UI,Tahoma,sans-serif;
 }
 
-.top-header{
-    background:#0f172a;
+.header-card{
+    background:linear-gradient(135deg,#0f172a,#1e293b);
     color:white;
-    padding:15px 25px;
     border-radius:15px;
+    padding:20px;
     margin-bottom:20px;
-}
-
-.top-header h2{
-    margin:0;
 }
 
 .kpi-card{
     border-radius:12px;
     color:white;
-    padding:12px;
     text-align:center;
-    height:90px;
+    padding:12px;
+    height:80px;
+    box-shadow:0 4px 8px rgba(0,0,0,.15);
 }
 
 .kpi-card h3{
@@ -44,24 +39,23 @@ body{
     font-weight:bold;
 }
 
-.kpi-card p{
-    margin:0;
-    font-size:13px;
+.total-card{
+    background:#475569;
 }
 
-.delivered{
+.delivered-card{
     background:#198754;
 }
 
-.transit{
+.transit-card{
     background:#0d6efd;
 }
 
-.pending{
+.pending-card{
     background:#dc3545;
 }
 
-.ofd{
+.ofd-card{
     background:#fd7e14;
 }
 
@@ -70,36 +64,15 @@ body{
     border-radius:15px;
     padding:20px;
     box-shadow:0 2px 10px rgba(0,0,0,.08);
+    margin-bottom:20px;
 }
 
 .progress{
     height:28px;
 }
 
-#progressBar{
-    font-weight:600;
-}
-
-.status-delivered{
-    background:#d1e7dd !important;
-}
-
-.status-transit{
-    background:#cfe2ff !important;
-}
-
-.status-pending{
-    background:#f8d7da !important;
-}
-
-.status-ofd{
-    background:#fff3cd !important;
-}
-
 .table th{
-    position:sticky;
-    top:0;
-    z-index:10;
+    white-space:nowrap;
 }
 
 textarea{
@@ -114,51 +87,74 @@ textarea{
 
 <div class="container-fluid p-4">
 
-<div class="top-header">
+<div class="header-card">
+
+<div class="d-flex justify-content-between align-items-center">
+
+<div>
 <h2>🚚 Criticalog Control Tower</h2>
-<div>Bulk AWB Tracking Dashboard</div>
+<p class="mb-0">
+Bulk AWB Tracking Dashboard
+</p>
 </div>
 
-<div class="row g-2 mb-3">
+<div>
+<span class="badge bg-light text-dark">
+Operations Dashboard
+</span>
+</div>
 
-<div class="col-md-3">
-<div class="kpi-card delivered">
+</div>
+
+</div>
+
+<div class="row g-2 mb-4">
+
+<div class="col">
+<div class="kpi-card total-card">
+<h3 id="totalCount">0</h3>
+<small>Total</small>
+</div>
+</div>
+
+<div class="col">
+<div class="kpi-card delivered-card">
 <h3 id="deliveredCount">0</h3>
-<p>Delivered</p>
+<small>Delivered</small>
 </div>
 </div>
 
-<div class="col-md-3">
-<div class="kpi-card transit">
+<div class="col">
+<div class="kpi-card transit-card">
 <h3 id="transitCount">0</h3>
-<p>In Transit</p>
+<small>In Transit</small>
 </div>
 </div>
 
-<div class="col-md-3">
-<div class="kpi-card ofd">
+<div class="col">
+<div class="kpi-card ofd-card">
 <h3 id="ofdCount">0</h3>
-<p>Out For Delivery</p>
+<small>OFD</small>
 </div>
 </div>
 
-<div class="col-md-3">
-<div class="kpi-card pending">
+<div class="col">
+<div class="kpi-card pending-card">
 <h3 id="pendingCount">0</h3>
-<p>Pickup Pending</p>
+<small>Pending</small>
 </div>
 </div>
 
 </div>
 
-<div class="section-card mb-3">
+<div class="section-card">
 
 <div class="row">
 
-<div class="col-md-8">
+<div class="col-lg-8">
 
-<label class="form-label">
-Paste AWBs (One Per Line)
+<label class="form-label fw-bold">
+Paste AWBs
 </label>
 
 <textarea
@@ -169,9 +165,9 @@ placeholder="CAF777800004083"></textarea>
 
 </div>
 
-<div class="col-md-4">
+<div class="col-lg-4">
 
-<label class="form-label">
+<label class="form-label fw-bold">
 Upload Excel
 </label>
 
@@ -185,7 +181,7 @@ accept=".xlsx,.xls">
 class="btn btn-primary w-100 mb-2"
 onclick="trackAll()">
 
-Track All
+🚚 Track All
 
 </button>
 
@@ -193,7 +189,7 @@ Track All
 class="btn btn-success w-100"
 onclick="exportTable()">
 
-Export Excel
+📊 Export Excel
 
 </button>
 
@@ -203,7 +199,11 @@ Export Excel
 
 </div>
 
-<div class="mb-3">
+<div class="section-card">
+
+<label class="form-label fw-bold">
+Tracking Progress
+</label>
 
 <div class="progress">
 
@@ -220,13 +220,13 @@ style="width:0%">
 
 </div>
 
-<div class="mb-3">
+<div class="section-card">
 
 <input
 type="text"
 id="searchBox"
 class="form-control"
-placeholder="Search AWB..."
+placeholder="Search AWB"
 onkeyup="searchTable()">
 
 </div>
@@ -242,6 +242,7 @@ class="table table-bordered table-hover">
 <thead class="table-dark">
 
 <tr>
+
 <th>AWB</th>
 <th>Status</th>
 <th>Origin</th>
@@ -249,6 +250,7 @@ class="table table-bordered table-hover">
 <th>Pickup Date</th>
 <th>EDD</th>
 <th>Delivered Date</th>
+
 </tr>
 
 </thead>
@@ -263,214 +265,296 @@ class="table table-bordered table-hover">
 
 </div>
 
-</div>
-
 <script>
 
 async function trackAll(){
 
-let awbs =
-document.getElementById("awbs")
-.value
-.split("\n")
-.map(x=>x.trim())
-.filter(x=>x);
+    const progress =
+    document.getElementById("progressBar");
 
-if(awbs.length===0){
-alert("Enter AWBs");
-return;
-}
+    let awbs =
+    document
+    .getElementById("awbs")
+    .value
+    .split("\n")
+    .map(x => x.trim())
+    .filter(x => x);
 
-const progress =
-document.getElementById("progressBar");
+    if(awbs.length === 0){
 
-progress.style.width="5%";
-progress.innerHTML="Starting...";
+        alert("Please enter AWBs");
 
-const response =
-await fetch("/track",{
+        return;
+    }
 
-method:"POST",
+    progress.style.width = "5%";
+    progress.innerHTML = "Starting...";
 
-headers:{
-"Content-Type":"application/json"
-},
+    const response =
+    await fetch("/track",{
 
-body:JSON.stringify({
-awbs:awbs
-})
+        method:"POST",
 
-});
+        headers:{
+            "Content-Type":"application/json"
+        },
 
-const data =
-await response.json();
+        body:JSON.stringify({
+            awbs:awbs
+        })
 
-const tbody =
-document.getElementById("results");
+    });
 
-tbody.innerHTML="";
+    const data =
+    await response.json();
 
-let delivered=0;
-let transit=0;
-let pending=0;
-let ofd=0;
+    const tbody =
+    document.getElementById("results");
 
-data.forEach((item,index)=>{
+    tbody.innerHTML = "";
 
-let cls="";
+    let total = data.length;
+    let delivered = 0;
+    let transit = 0;
+    let pending = 0;
+    let ofd = 0;
 
-if(item.status==="Delivered"){
-delivered++;
-cls="status-delivered";
-}
-else if(item.status==="In Transit"){
-transit++;
-cls="status-transit";
-}
-else if(item.status==="Pickup Pending"){
-pending++;
-cls="status-pending";
-}
-else if(item.status==="Out For Delivery"){
-ofd++;
-cls="status-ofd";
-}
+    data.forEach((item,index)=>{
 
-tbody.innerHTML += `
-<tr class="${cls}">
-<td>${item.awb || ''}</td>
-<td>${item.status || ''}</td>
-<td>${item.origin || ''}</td>
-<td>${item.destination || ''}</td>
-<td>${item.pickup_date || ''}</td>
-<td>${item.edd || ''}</td>
-<td>${item.delivered_date || ''}</td>
-</tr>
-`;
+        let badgeClass =
+        "bg-secondary";
 
-let pct =
-Math.round(
-((index+1) / data.length) * 100
-);
+        if(item.status === "Delivered"){
 
-progress.style.width =
-pct + "%";
+            delivered++;
+            badgeClass = "bg-success";
 
-progress.innerHTML =
-pct + "%";
+        }
 
-});
+        else if(item.status === "In Transit"){
 
-document.getElementById("deliveredCount").innerHTML =
-delivered;
+            transit++;
+            badgeClass = "bg-primary";
 
-document.getElementById("transitCount").innerHTML =
-transit;
+        }
 
-document.getElementById("ofdCount").innerHTML =
-ofd;
+        else if(item.status === "Out For Delivery"){
 
-document.getElementById("pendingCount").innerHTML =
-pending;
+            ofd++;
+            badgeClass = "bg-warning text-dark";
 
-progress.innerHTML="Completed";
+        }
 
-}
+        else if(item.status === "Pickup Pending"){
 
+            pending++;
+            badgeClass = "bg-danger";
+
+        }
+
+        tbody.innerHTML += `
+
+        <tr>
+
+            <td>
+                ${item.awb || ''}
+            </td>
+
+            <td>
+                <span class="badge ${badgeClass}">
+                    ${item.status || ''}
+                </span>
+            </td>
+
+            <td>
+                ${item.origin || ''}
+            </td>
+
+            <td>
+                ${item.destination || ''}
+            </td>
+
+            <td>
+                ${item.pickup_date || ''}
+            </td>
+
+            <td>
+                ${item.edd || ''}
+            </td>
+
+            <td>
+                ${item.delivered_date || ''}
+            </td>
+
+        </tr>
+
+        `;
+
+        let percent =
+        Math.round(
+            ((index + 1) / total) * 100
+        );
+
+        progress.style.width =
+        percent + "%";
+
+        progress.innerHTML =
+        percent + "%";
+
+    });
+
+    document.getElementById("totalCount").innerHTML =
+    total;
+
+    document.getElementById("deliveredCount").innerHTML =
+    delivered;
+
+    document.getElementById("transitCount").innerHTML =
+    transit;
+
+    document.getElementById("ofdCount").innerHTML =
+    ofd;
+
+    document.getElementById("pendingCount").innerHTML =
+    pending;
+
+    progress.innerHTML =
+    "Completed";
+
+    }
 function searchTable(){
 
-let filter =
-document.getElementById("searchBox")
-.value
-.toUpperCase();
+    let filter =
+    document
+    .getElementById("searchBox")
+    .value
+    .toUpperCase();
 
-let rows =
-document.querySelectorAll(
-"#resultTable tbody tr"
-);
+    let rows =
+    document.querySelectorAll(
+        "#resultTable tbody tr"
+    );
 
-rows.forEach(row=>{
+    rows.forEach(row=>{
 
-let awb =
-row.cells[0].innerText.toUpperCase();
+        let text =
+        row.innerText.toUpperCase();
 
-row.style.display =
-awb.includes(filter)
-? ""
-: "none";
+        row.style.display =
+        text.includes(filter)
+        ? ""
+        : "none";
 
-});
+    });
 
 }
 
 function exportTable(){
 
-let table =
-document.getElementById("resultTable");
+    const table =
+    document.getElementById(
+        "resultTable"
+    );
 
-let wb =
-XLSX.utils.table_to_book(table);
+    if(table.rows.length <= 1){
 
-XLSX.writeFile(
-wb,
-"Criticalog_Report.xlsx"
-);
+        alert(
+            "No data available to export"
+        );
+
+        return;
+
+    }
+
+    const workbook =
+    XLSX.utils.table_to_book(
+        table,
+        {
+            sheet:"Tracking"
+        }
+    );
+
+    XLSX.writeFile(
+        workbook,
+        "Criticalog_Report.xlsx"
+    );
 
 }
 
-document.getElementById("excelFile")
-.addEventListener("change",function(e){
+document
+.getElementById("excelFile")
+.addEventListener(
+    "change",
+    function(e){
 
-const file =
-e.target.files[0];
+        const file =
+        e.target.files[0];
 
-if(!file) return;
+        if(!file){
+            return;
+        }
 
-const reader =
-new FileReader();
+        const reader =
+        new FileReader();
 
-reader.onload=function(evt){
+        reader.onload =
+        function(evt){
 
-const data =
-new Uint8Array(evt.target.result);
+            const data =
+            new Uint8Array(
+                evt.target.result
+            );
 
-const workbook =
-XLSX.read(
-data,
-{type:"array"}
+            const workbook =
+            XLSX.read(
+                data,
+                {
+                    type:"array"
+                }
+            );
+
+            const sheet =
+            workbook.Sheets[
+                workbook.SheetNames[0]
+            ];
+
+            const rows =
+            XLSX.utils.sheet_to_json(
+                sheet,
+                {
+                    header:1
+                }
+            );
+
+            let awbs=[];
+
+            rows.forEach(row=>{
+
+                if(row[0]){
+                    awbs.push(
+                        row[0]
+                    );
+                }
+
+            });
+
+            document
+            .getElementById("awbs")
+            .value =
+            awbs.join("\n");
+
+        };
+
+        reader.readAsArrayBuffer(
+            file
+        );
+
+    }
 );
-
-const sheet =
-workbook.Sheets[
-workbook.SheetNames[0]
-];
-
-const rows =
-XLSX.utils.sheet_to_json(
-sheet,
-{header:1}
-);
-
-let awbs=[];
-
-rows.forEach(row=>{
-
-if(row[0]){
-awbs.push(row[0]);
-}
-
-});
-
-document.getElementById("awbs").value =
-awbs.join("\n");
-
-};
-
-reader.readAsArrayBuffer(file);
-
-});
 
 </script>
+
+5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
