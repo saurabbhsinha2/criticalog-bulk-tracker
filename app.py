@@ -4,41 +4,26 @@ from bs4 import BeautifulSoup
 
 app = Flask(__name__)
 
-def extract_field(soup, label):
-
-    strongs = soup.find_all("strong")
-
-    for s in strongs:
-
-        if label.lower() in s.get_text().lower():
-
-            parent = s.parent.get_text(" ", strip=True)
-
-            value = parent.replace(s.get_text(), "").strip()
-
-            return value
-
-    return ""
+TRACK_URL = "https://criticalog.com/track_db.php"
 
 
 def get_tracking_details(awb):
 
     try:
 
-        r = requests.post(
-            "https://criticalog.com/track_db.php",
+        response = requests.post(
+            TRACK_URL,
             data={
-                "doctype":"D",
-                "docNumber":awb,
-                "action":"t"
+                "doctype": "D",
+                "docNumber": awb,
+                "action": "t"
             },
             timeout=30
         )
 
-        soup = BeautifulSoup(r.text,"html.parser")
+        soup = BeautifulSoup(response.text, "html.parser")
 
         active_steps = soup.select("div.track div.step.active")
-
         count = len(active_steps)
 
         if count >= 5:
@@ -57,60 +42,75 @@ def get_tracking_details(awb):
         origin = ""
         destination = ""
 
-        divs = soup.find_all("div")
+        locations = soup.select("div.col-md-6.border_row")
 
-        for div in divs:
+        if len(locations) >= 2:
+            origin = locations[0].get_text(" ", strip=True).replace("Origin", "").strip()
+            destination = locations[1].get_text(" ", strip=True).replace("Destination", "").strip()
 
-            text = div.get_text(" ", strip=True)
+        pickup_date = ""
+        edd = ""
+        delivered_date = ""
 
-            if "Origin" in text and not origin:
-                origin = text.replace("Origin","").strip()
+        cards = soup.find_all("article", class_="card")
 
-            if "Destination" in text and not destination:
-                destination = text.replace("Destination","").strip()
+        for card in cards:
 
-        pickup_date = extract_field(soup,"Pickup Date")
-        edd = extract_field(soup,"Estimated Delivery Date")
-        received_date = extract_field(soup,"Received date")
-        received_by = extract_field(soup,"Received By")
+            text = card.get_text(" ", strip=True)
+
+            if "Pickup Date/Time" in text:
+                try:
+                    pickup_date = text.split("Pickup Date/Time")[-1].strip()
+                except:
+                    pass
+
+            if "Estimated Delivery Date" in text:
+                try:
+                    edd = text.split("Estimated Delivery Date/Time:")[-1].strip()
+                except:
+                    pass
+
+            if "Received date/Time" in text:
+                try:
+                    delivered_date = text.split("Received date/Time")[-1].strip()
+                except:
+                    pass
 
         return {
-            "awb":awb,
-            "status":status,
-            "origin":origin,
-            "destination":destination,
-            "pickup_date":pickup_date,
-            "edd":edd,
-            "received_date":received_date,
-            "received_by":received_by
+            "awb": awb,
+            "status": status,
+            "origin": origin,
+            "destination": destination,
+            "pickup_date": pickup_date,
+            "edd": edd,
+            "delivered_date": delivered_date
         }
 
-    except Exception as e:
+    except Exception:
 
         return {
-            "awb":awb,
-            "status":"Error",
-            "origin":"",
-            "destination":"",
-            "pickup_date":"",
-            "edd":"",
-            "received_date":"",
-            "received_by":""
+            "awb": awb,
+            "status": "Error",
+            "origin": "",
+            "destination": "",
+            "pickup_date": "",
+            "edd": "",
+            "delivered_date": ""
         }
 
 
 @app.route("/")
 def home():
-
     return render_template("index.html")
 
 
-@app.route("/track",methods=["POST"])
+@app.route("/track", methods=["POST"])
 def track():
 
-    awbs = request.json.get("awbs",[])
+    data = request.get_json()
+    awbs = data.get("awbs", [])
 
-    results=[]
+    results = []
 
     for awb in awbs:
 
@@ -122,5 +122,5 @@ def track():
     return jsonify(results)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     app.run(debug=True)
