@@ -2,67 +2,82 @@
 <html lang="en">
 
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<title>Criticalog Bulk Tracker</title>
+<title>Criticalog Control Tower</title>
 
-5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/3.3/dist/css/bootstrap.min.css
 
-cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
 
 body{
-    background:#f4f7fb;
+    background:#edf2f7;
+    font-family:Segoe UI,Tahoma,sans-serif;
 }
 
-.dashboard-card{
-    border-radius:15px;
-    padding:20px;
+.top-header{
+    background:#0f172a;
     color:white;
-    text-align:center;
+    padding:15px 25px;
+    border-radius:15px;
+    margin-bottom:20px;
 }
 
-.delivered-card{
+.top-header h2{
+    margin:0;
+}
+
+.kpi-card{
+    border-radius:12px;
+    color:white;
+    padding:12px;
+    text-align:center;
+    height:90px;
+}
+
+.kpi-card h3{
+    margin:0;
+    font-size:24px;
+    font-weight:bold;
+}
+
+.kpi-card p{
+    margin:0;
+    font-size:13px;
+}
+
+.delivered{
     background:#198754;
 }
 
-.transit-card{
+.transit{
     background:#0d6efd;
 }
 
-.pending-card{
+.pending{
     background:#dc3545;
 }
 
-.ofd-card{
+.ofd{
     background:#fd7e14;
 }
 
-.dashboard-card h2{
-    margin:0;
-    font-weight:bold;
-}
-
-.main-box{
+.section-card{
     background:white;
     border-radius:15px;
     padding:20px;
-    box-shadow:0px 2px 10px rgba(0,0,0,0.10);
-}
-
-textarea{
-    resize:vertical;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
 }
 
 .progress{
-    height:30px;
+    height:28px;
 }
 
 #progressBar{
-    font-weight:bold;
+    font-weight:600;
 }
 
 .status-delivered{
@@ -81,6 +96,16 @@ textarea{
     background:#fff3cd !important;
 }
 
+.table th{
+    position:sticky;
+    top:0;
+    z-index:10;
+}
+
+textarea{
+    resize:vertical;
+}
+
 </style>
 
 </head>
@@ -89,74 +114,75 @@ textarea{
 
 <div class="container-fluid p-4">
 
-<h2 class="mb-4">
-🚚 Criticalog Bulk Tracker
-</h2>
+<div class="top-header">
+<h2>🚚 Criticalog Control Tower</h2>
+<div>Bulk AWB Tracking Dashboard</div>
+</div>
 
-<!-- Dashboard -->
+<div class="row g-2 mb-3">
 
-<div class="row mb-4">
-
-<div class="col-md-3 mb-3">
-<div class="dashboard-card delivered-card">
-<h2 id="deliveredCount">0</h2>
-<div>Delivered</div>
+<div class="col-md-3">
+<div class="kpi-card delivered">
+<h3 id="deliveredCount">0</h3>
+<p>Delivered</p>
 </div>
 </div>
 
-<div class="col-md-3 mb-3">
-<div class="dashboard-card transit-card">
-<h2 id="transitCount">0</h2>
-<div>In Transit</div>
+<div class="col-md-3">
+<div class="kpi-card transit">
+<h3 id="transitCount">0</h3>
+<p>In Transit</p>
 </div>
 </div>
 
-<div class="col-md-3 mb-3">
-<div class="dashboard-card pending-card">
-<h2 id="pendingCount">0</h2>
-<div>Pickup Pending</div>
+<div class="col-md-3">
+<div class="kpi-card ofd">
+<h3 id="ofdCount">0</h3>
+<p>Out For Delivery</p>
 </div>
 </div>
 
-<div class="col-md-3 mb-3">
-<div class="dashboard-card ofd-card">
-<h2 id="ofdCount">0</h2>
-<div>Out For Delivery</div>
+<div class="col-md-3">
+<div class="kpi-card pending">
+<h3 id="pendingCount">0</h3>
+<p>Pickup Pending</p>
 </div>
 </div>
 
 </div>
 
-<!-- AWB Input -->
+<div class="section-card mb-3">
 
-<div class="main-box mb-4">
+<div class="row">
 
-<h5>Paste AWBs</h5>
+<div class="col-md-8">
+
+<label class="form-label">
+Paste AWBs (One Per Line)
+</label>
 
 <textarea
 id="awbs"
 class="form-control"
-rows="10"
-placeholder="One AWB per line"></textarea>
+rows="8"
+placeholder="CAF777800004083"></textarea>
 
-<br>
+</div>
 
-<div class="row">
+<div class="col-md-4">
 
-<div class="col-md-4 mb-2">
+<label class="form-label">
+Upload Excel
+</label>
 
 <input
 type="file"
 id="excelFile"
-class="form-control"
+class="form-control mb-3"
 accept=".xlsx,.xls">
 
-</div>
-
-<div class="col-md-8">
-
 <button
-class="btn btn-primary"
+class="btn btn-primary w-100 mb-2"
 onclick="trackAll()">
 
 Track All
@@ -164,7 +190,7 @@ Track All
 </button>
 
 <button
-class="btn btn-success"
+class="btn btn-success w-100"
 onclick="exportTable()">
 
 Export Excel
@@ -177,9 +203,7 @@ Export Excel
 
 </div>
 
-<!-- Progress Bar -->
-
-<div class="mb-4">
+<div class="mb-3">
 
 <div class="progress">
 
@@ -196,8 +220,6 @@ style="width:0%">
 
 </div>
 
-<!-- Search -->
-
 <div class="mb-3">
 
 <input
@@ -209,9 +231,7 @@ onkeyup="searchTable()">
 
 </div>
 
-<!-- Table -->
-
-<div class="main-box">
+<div class="section-card">
 
 <div class="table-responsive">
 
@@ -222,12 +242,13 @@ class="table table-bordered table-hover">
 <thead class="table-dark">
 
 <tr>
-
 <th>AWB</th>
 <th>Status</th>
 <th>Origin</th>
 <th>Destination</th>
-
+<th>Pickup Date</th>
+<th>EDD</th>
+<th>Delivered Date</th>
 </tr>
 
 </thead>
@@ -256,15 +277,15 @@ document.getElementById("awbs")
 .filter(x=>x);
 
 if(awbs.length===0){
-alert("Please enter AWBs");
+alert("Enter AWBs");
 return;
 }
 
-let progress =
+const progress =
 document.getElementById("progressBar");
 
-progress.style.width="20%";
-progress.innerText="Tracking...";
+progress.style.width="5%";
+progress.innerHTML="Starting...";
 
 const response =
 await fetch("/track",{
@@ -281,122 +302,119 @@ awbs:awbs
 
 });
 
-const data = await response.json();
-
-let delivered=0;
-let transit=0;
-let pending=0;
-let ofd=0;
+const data =
+await response.json();
 
 const tbody =
 document.getElementById("results");
 
 tbody.innerHTML="";
 
+let delivered=0;
+let transit=0;
+let pending=0;
+let ofd=0;
+
 data.forEach((item,index)=>{
 
-let rowClass="";
+let cls="";
 
 if(item.status==="Delivered"){
 delivered++;
-rowClass="status-delivered";
+cls="status-delivered";
 }
-
 else if(item.status==="In Transit"){
 transit++;
-rowClass="status-transit";
+cls="status-transit";
 }
-
 else if(item.status==="Pickup Pending"){
 pending++;
-rowClass="status-pending";
+cls="status-pending";
 }
-
 else if(item.status==="Out For Delivery"){
 ofd++;
-rowClass="status-ofd";
+cls="status-ofd";
 }
 
 tbody.innerHTML += `
-
-<tr class="${rowClass}">
-<td>${item.awb}</td>
-<td>${item.status}</td>
-<td>${item.origin}</td>
-<td>${item.destination}</td>
+<tr class="${cls}">
+<td>${item.awb || ''}</td>
+<td>${item.status || ''}</td>
+<td>${item.origin || ''}</td>
+<td>${item.destination || ''}</td>
+<td>${item.pickup_date || ''}</td>
+<td>${item.edd || ''}</td>
+<td>${item.delivered_date || ''}</td>
 </tr>
-
 `;
 
 let pct =
 Math.round(
-((index+1)/data.length)*100
+((index+1) / data.length) * 100
 );
 
 progress.style.width =
 pct + "%";
 
-progress.innerText =
+progress.innerHTML =
 pct + "%";
 
 });
 
-document.getElementById("deliveredCount").innerText=delivered;
-document.getElementById("transitCount").innerText=transit;
-document.getElementById("pendingCount").innerText=pending;
-document.getElementById("ofdCount").innerText=ofd;
+document.getElementById("deliveredCount").innerHTML =
+delivered;
 
-progress.innerText="Completed";
+document.getElementById("transitCount").innerHTML =
+transit;
 
-}
+document.getElementById("ofdCount").innerHTML =
+ofd;
 
-function exportTable(){
+document.getElementById("pendingCount").innerHTML =
+pending;
 
-const table =
-document.getElementById("resultTable");
-
-const workbook =
-XLSX.utils.table_to_book(table);
-
-XLSX.writeFile(
-workbook,
-"Criticalog_Report.xlsx"
-);
+progress.innerHTML="Completed";
 
 }
 
 function searchTable(){
 
-let input =
-document.getElementById("searchBox");
-
 let filter =
-input.value.toUpperCase();
+document.getElementById("searchBox")
+.value
+.toUpperCase();
+
+let rows =
+document.querySelectorAll(
+"#resultTable tbody tr"
+);
+
+rows.forEach(row=>{
+
+let awb =
+row.cells[0].innerText.toUpperCase();
+
+row.style.display =
+awb.includes(filter)
+? ""
+: "none";
+
+});
+
+}
+
+function exportTable(){
 
 let table =
 document.getElementById("resultTable");
 
-let tr =
-table.getElementsByTagName("tr");
+let wb =
+XLSX.utils.table_to_book(table);
 
-for(let i=1;i<tr.length;i++){
-
-let td =
-tr[i].getElementsByTagName("td")[0];
-
-if(td){
-
-let txt =
-td.textContent || td.innerText;
-
-tr[i].style.display =
-txt.toUpperCase().indexOf(filter)>-1
-? ""
-: "none";
-
-}
-
-}
+XLSX.writeFile(
+wb,
+"Criticalog_Report.xlsx"
+);
 
 }
 
@@ -417,7 +435,10 @@ const data =
 new Uint8Array(evt.target.result);
 
 const workbook =
-XLSX.read(data,{type:'array'});
+XLSX.read(
+data,
+{type:"array"}
+);
 
 const sheet =
 workbook.Sheets[
@@ -452,5 +473,4 @@ reader.readAsArrayBuffer(file);
 </script>
 
 </body>
-
 </html>
