@@ -1,39 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
 <title>Criticalog Bulk Tracker</title>
+
+5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <style>
 
 body{
-font-family:Arial;
-padding:20px;
+    background:#f4f7fb;
+}
+
+.dashboard-card{
+    border-radius:15px;
+    padding:20px;
+    color:white;
+    text-align:center;
+}
+
+.delivered-card{
+    background:#198754;
+}
+
+.transit-card{
+    background:#0d6efd;
+}
+
+.pending-card{
+    background:#dc3545;
+}
+
+.ofd-card{
+    background:#fd7e14;
+}
+
+.dashboard-card h2{
+    margin:0;
+    font-weight:bold;
+}
+
+.main-box{
+    background:white;
+    border-radius:15px;
+    padding:20px;
+    box-shadow:0px 2px 10px rgba(0,0,0,0.10);
 }
 
 textarea{
-width:100%;
-height:250px;
+    resize:vertical;
 }
 
-button{
-padding:10px 20px;
-margin-top:10px;
+.progress{
+    height:30px;
 }
 
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:20px;
+#progressBar{
+    font-weight:bold;
 }
 
-th,td{
-border:1px solid #ddd;
-padding:8px;
-text-align:left;
+.status-delivered{
+    background:#d1e7dd !important;
 }
 
-th{
-background:#f5f5f5;
+.status-transit{
+    background:#cfe2ff !important;
+}
+
+.status-pending{
+    background:#f8d7da !important;
+}
+
+.status-ofd{
+    background:#fff3cd !important;
 }
 
 </style>
@@ -42,72 +87,367 @@ background:#f5f5f5;
 
 <body>
 
-<h2>Criticalog Bulk Tracker</h2>
+<div class="container-fluid p-4">
 
-<textarea id="awbs"
-placeholder="Paste AWBs here, one per line"></textarea>
+<h2 class="mb-4">
+🚚 Criticalog Bulk Tracker
+</h2>
+
+<!-- Dashboard -->
+
+<div class="row mb-4">
+
+<div class="col-md-3 mb-3">
+<div class="dashboard-card delivered-card">
+<h2 id="deliveredCount">0</h2>
+<div>Delivered</div>
+</div>
+</div>
+
+<div class="col-md-3 mb-3">
+<div class="dashboard-card transit-card">
+<h2 id="transitCount">0</h2>
+<div>In Transit</div>
+</div>
+</div>
+
+<div class="col-md-3 mb-3">
+<div class="dashboard-card pending-card">
+<h2 id="pendingCount">0</h2>
+<div>Pickup Pending</div>
+</div>
+</div>
+
+<div class="col-md-3 mb-3">
+<div class="dashboard-card ofd-card">
+<h2 id="ofdCount">0</h2>
+<div>Out For Delivery</div>
+</div>
+</div>
+
+</div>
+
+<!-- AWB Input -->
+
+<div class="main-box mb-4">
+
+<h5>Paste AWBs</h5>
+
+<textarea
+id="awbs"
+class="form-control"
+rows="10"
+placeholder="One AWB per line"></textarea>
 
 <br>
 
-<button onclick="trackAll()">Track All</button>
+<div class="row">
 
-<table>
+<div class="col-md-4 mb-2">
 
-<thead>
+<input
+type="file"
+id="excelFile"
+class="form-control"
+accept=".xlsx,.xls">
+
+</div>
+
+<div class="col-md-8">
+
+<button
+class="btn btn-primary"
+onclick="trackAll()">
+
+Track All
+
+</button>
+
+<button
+class="btn btn-success"
+onclick="exportTable()">
+
+Export Excel
+
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Progress Bar -->
+
+<div class="mb-4">
+
+<div class="progress">
+
+<div
+id="progressBar"
+class="progress-bar progress-bar-striped progress-bar-animated"
+style="width:0%">
+
+0%
+
+</div>
+
+</div>
+
+</div>
+
+<!-- Search -->
+
+<div class="mb-3">
+
+<input
+type="text"
+id="searchBox"
+class="form-control"
+placeholder="Search AWB..."
+onkeyup="searchTable()">
+
+</div>
+
+<!-- Table -->
+
+<div class="main-box">
+
+<div class="table-responsive">
+
+<table
+id="resultTable"
+class="table table-bordered table-hover">
+
+<thead class="table-dark">
+
 <tr>
+
 <th>AWB</th>
 <th>Status</th>
 <th>Origin</th>
 <th>Destination</th>
+
 </tr>
+
 </thead>
 
-<tbody id="results"></tbody>
+<tbody id="results">
+
+</tbody>
 
 </table>
+
+</div>
+
+</div>
+
+</div>
 
 <script>
 
 async function trackAll(){
 
-let awbs = document
-.getElementById("awbs")
+let awbs =
+document.getElementById("awbs")
 .value
 .split("\n")
-.map(x => x.trim())
-.filter(x => x);
+.map(x=>x.trim())
+.filter(x=>x);
 
-const response = await fetch("/track",{
+if(awbs.length===0){
+alert("Please enter AWBs");
+return;
+}
+
+let progress =
+document.getElementById("progressBar");
+
+progress.style.width="20%";
+progress.innerText="Tracking...";
+
+const response =
+await fetch("/track",{
+
 method:"POST",
+
 headers:{
 "Content-Type":"application/json"
 },
+
 body:JSON.stringify({
 awbs:awbs
 })
+
 });
 
 const data = await response.json();
 
+let delivered=0;
+let transit=0;
+let pending=0;
+let ofd=0;
+
 const tbody =
 document.getElementById("results");
 
-tbody.innerHTML = "";
+tbody.innerHTML="";
 
-data.forEach(item=>{
+data.forEach((item,index)=>{
+
+let rowClass="";
+
+if(item.status==="Delivered"){
+delivered++;
+rowClass="status-delivered";
+}
+
+else if(item.status==="In Transit"){
+transit++;
+rowClass="status-transit";
+}
+
+else if(item.status==="Pickup Pending"){
+pending++;
+rowClass="status-pending";
+}
+
+else if(item.status==="Out For Delivery"){
+ofd++;
+rowClass="status-ofd";
+}
 
 tbody.innerHTML += `
-<tr>
+
+<tr class="${rowClass}">
 <td>${item.awb}</td>
 <td>${item.status}</td>
 <td>${item.origin}</td>
 <td>${item.destination}</td>
 </tr>
+
 `;
+
+let pct =
+Math.round(
+((index+1)/data.length)*100
+);
+
+progress.style.width =
+pct + "%";
+
+progress.innerText =
+pct + "%";
 
 });
 
+document.getElementById("deliveredCount").innerText=delivered;
+document.getElementById("transitCount").innerText=transit;
+document.getElementById("pendingCount").innerText=pending;
+document.getElementById("ofdCount").innerText=ofd;
+
+progress.innerText="Completed";
+
 }
+
+function exportTable(){
+
+const table =
+document.getElementById("resultTable");
+
+const workbook =
+XLSX.utils.table_to_book(table);
+
+XLSX.writeFile(
+workbook,
+"Criticalog_Report.xlsx"
+);
+
+}
+
+function searchTable(){
+
+let input =
+document.getElementById("searchBox");
+
+let filter =
+input.value.toUpperCase();
+
+let table =
+document.getElementById("resultTable");
+
+let tr =
+table.getElementsByTagName("tr");
+
+for(let i=1;i<tr.length;i++){
+
+let td =
+tr[i].getElementsByTagName("td")[0];
+
+if(td){
+
+let txt =
+td.textContent || td.innerText;
+
+tr[i].style.display =
+txt.toUpperCase().indexOf(filter)>-1
+? ""
+: "none";
+
+}
+
+}
+
+}
+
+document.getElementById("excelFile")
+.addEventListener("change",function(e){
+
+const file =
+e.target.files[0];
+
+if(!file) return;
+
+const reader =
+new FileReader();
+
+reader.onload=function(evt){
+
+const data =
+new Uint8Array(evt.target.result);
+
+const workbook =
+XLSX.read(data,{type:'array'});
+
+const sheet =
+workbook.Sheets[
+workbook.SheetNames[0]
+];
+
+const rows =
+XLSX.utils.sheet_to_json(
+sheet,
+{header:1}
+);
+
+let awbs=[];
+
+rows.forEach(row=>{
+
+if(row[0]){
+awbs.push(row[0]);
+}
+
+});
+
+document.getElementById("awbs").value =
+awbs.join("\n");
+
+};
+
+reader.readAsArrayBuffer(file);
+
+});
 
 </script>
 
